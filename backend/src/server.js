@@ -1,16 +1,12 @@
 import express from "express";
-
+import authRoutes from "./routes/auth.routes.js"
+import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
 const app = express();
 
 
-app.get("/api/auth/signup",(req,res)=>{
-    res.send("SignUp endpoint");
+app.use("/api/auth/",authRoutes);
+connectDB().then(()=>{
+    app.listen(ENV.PORT,()=>console.log("Sever is running on port 3000"));
 })
 
-app.get("/api/auth/login",(req,res)=>{
-    res.send("login endpoint");
-})
-app.get("/api/auth/logout",(req,res)=>{
-    res.send("logout endpoint");
-})
-app.listen(3000,()=>console.log("Sever is running on port 3000"));
