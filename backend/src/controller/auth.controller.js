@@ -44,13 +44,13 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    if ((!email, !password))
+    if ((!email|| !password))
       return res.status(400).jsonn({ message: "All feilds Required" });
     const user = await User.findOne({ email });
     if (!user) return res.status(400).jsonn({ message: "User not exist!" });
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect)
-      return res.status(400).jsonn({ message: "Invaild Credentials" });
+      return res.status(400).jsonn({ message: "Invalid Credentials" });
     generateToken(user._id, res);
     res.status(200).json({
       _id: user._id,
@@ -66,13 +66,13 @@ export const login = async (req, res) => {
 
 export const logout = async (_, res) => {
   res.cookie("jwt", "", { maxAge: 0, sameSite: "none", secure: true });
-  res.status(200).json({ message: "Logout Successfully" });
+  res.status(200).json({ message: "Logout Successfu lly" });
 };
 
 export const updateProfile = async(req,res)=>{
     try {
        const {profilePic} = req.body;
-    if(!profilePic) return res.stauts(400).json({message:"Profile pic is required" });
+    if(!profilePic) return res.status(400).json({message:"Profile pic is required" });
     const userId = req.user._id;
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
 
