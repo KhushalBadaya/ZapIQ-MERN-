@@ -93,5 +93,61 @@ export const createQuizwithAI = async (req, res) => {
   }
 };
 
-export const getRecentQuiz = async (req, res) => {};
-export const getQuizHistroy = async (req, res) => {};
+export const getRecentQuiz = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { limit = 6 } = req.query;
+
+    const recentquiz = await Quiz.find({
+      $or: [{ createdBy: userId }, { participants: userId }],
+    })
+      .sort({ createdAt: -1 })
+      .limit(Number(limit))
+      .populate("createdBy", "name email")
+      .populate("questions")
+      .select("title topic isAIGenerated createdAt questions createdBy");
+
+    if (recentquiz.length === 0) {
+      return res.status(200).json({ message: "No recent quiz found" });
+    }
+    res
+      .status(200)
+      .json({
+        success: true,
+        count: recentquiz.length,
+        data: recentquiz,
+      });
+  } catch (error) {
+    console.log("Error in getting recent quizzes", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+  export const getQuizHistroy = async (req, res) => {
+    try {
+      const userId=req.user._id;
+      const quizhistroy= await Quiz.find({
+        $or:[
+          {createdBy:userId},
+          {participants:userId}
+        ]
+      })
+      .sort({createdAt:-1})
+      .populate("createdBy","name email")
+      .populate("questions")
+      .select("title topic isAIGenerated createdAt questions createdBy")
+
+      if(quizhistroy.length===0){
+        return res.status(200).json({ message: "No quiz found" });
+      }
+        res
+        .status(200)
+        .json({
+          success: true,
+          count: quizhistroy.length,
+          data: quizhistroy,
+        });
+    } catch (error) {
+      console.log("Error in getting recent quizzes", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
