@@ -32,6 +32,19 @@ const Quiz = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    shareCode: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple documents to have no shareCode
+    },
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
+    timeLimit: {
+      type: Number,
+      default:30
+    },
   },
   { timestamps: true },
 );
