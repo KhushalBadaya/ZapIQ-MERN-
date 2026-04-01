@@ -7,7 +7,7 @@ export const signup = async (req, res) => {
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All feilds required" });
     }
-    if (password.length() < 6) {
+    if (password.length < 6) {
       return res
         .status(400)
         .json({ message: "Password should be 6 characters or more" });
@@ -45,12 +45,12 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     if ((!email|| !password))
-      return res.status(400).jsonn({ message: "All feilds Required" });
+      return res.status(400).json({ message: "All feilds Required" });
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).jsonn({ message: "User not exist!" });
+    if (!user) return res.status(400).json({ message: "User not exist!" });
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect)
-      return res.status(400).jsonn({ message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid Credentials" });
     generateToken(user._id, res);
     res.status(200).json({
       _id: user._id,

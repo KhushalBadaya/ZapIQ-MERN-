@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore.js";
 import { useNavigate } from "react-router";
+import { Link } from "react-router";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -9,11 +10,10 @@ export default function SignupPage() {
     email: "",
     password: "",
   });
-
   const { signup, isSigningUp } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange= (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
