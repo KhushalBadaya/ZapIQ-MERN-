@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import HomePage from "./pages/HomePage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 function App() {
   const {authUser,checkAuth,isCheckingAuth} = useAuthStore();
   useEffect(() => {
@@ -18,6 +19,7 @@ return (
      <Route path="/" element={<HomePage />} />
     <Route path="/signup" element={<SignupPage />} />
     <Route path="/login" element={<LoginPage/>} />
+    <Route path="/dashboard" element={<Dashboard/>} />
     </Routes>
   );
 }
