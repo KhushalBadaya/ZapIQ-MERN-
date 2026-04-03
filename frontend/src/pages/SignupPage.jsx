@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore.js";
-import { useNavigate } from "react-router";
-import { Link } from "react-router";
+
+
+import { useNavigate } from "react-router-dom";
+
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({

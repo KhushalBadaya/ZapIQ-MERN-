@@ -1,4 +1,4 @@
-import {Routes,Navigate,Route} from "react-router"
+import {Routes,Navigate,Route} from "react-router-dom"
 import {useAuthStore} from "../src/store/useAuthStore.js"
 import { useEffect } from "react";
 // import Dashboard from "../src/pages/Dashboard.jsx";
@@ -21,10 +21,11 @@ function App() {
 
 return (
     <Routes>
-     <Route path="/" element={<HomePage />} />
-    <Route path="/signup" element={<SignupPage />} />
-    <Route path="/login" element={<LoginPage/>} />
-    <Route path="/dashboard" element={<Dashboard/>} />
+    <Route path="/" element={authUser ? <Navigate to="/dashboard" /> : <HomePage />} />
+    <Route path="/signup" element={authUser ? <Navigate to="/dashboard" /> : <SignupPage />} />
+    <Route path="/login" element={authUser ? <Navigate to="/dashboard" /> : <LoginPage />} />
+    <Route path="/dashboard" element={authUser ? <Dashboard /> : <Navigate to="/" />}/>
+
     <Route path="/createquiz" element={<CreateQuizModal/>} />
     <Route path="/createquiz/manual" element={<ManualCreatePage/>} />
     <Route path="/createquiz/ai" element={<AICreatePage/>} />
@@ -33,6 +34,6 @@ return (
     </Routes>
   );
 }
-
+  
 
 export default App
