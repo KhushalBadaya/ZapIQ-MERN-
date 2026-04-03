@@ -43,7 +43,23 @@ const Quiz = new mongoose.Schema(
     },
     timeLimit: {
       type: Number,
-      default:30
+      default: 30,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    passingScore: {
+      type: Number,
+      default: 70,
+    },
+    randomizeQuestions: {
+      type: Boolean,
+      default: false,
+    },
+    immediateResults: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },
