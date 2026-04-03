@@ -1,7 +1,8 @@
-import OpenAI from "openai";
-import Question from "../models/Question.js";
+
 import Quiz from "../models/Quiz.js";
 
+import OpenAI from "openai";
+import Question from "../models/Question.js";
 export const createQuizManul = async (req, res) => {
   try {
     const { question, option1, option2, option3, option4, correctanswer } =
@@ -92,7 +93,6 @@ export const createQuizwithAI = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 export const getRecentQuiz = async (req, res) => {
   try {
     const userId = req.user._id;
