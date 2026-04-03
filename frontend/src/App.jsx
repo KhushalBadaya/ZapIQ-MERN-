@@ -7,6 +7,8 @@ import SignupPage from "./pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import CreateQuizModal from "./pages/CreateQuizPage.jsx";
+import ManualCreatePage from "./pages/ManualQuizPage.jsx";
+import AICreatePage from "./pages/AIQuizPage.jsx";
 function App() {
   const {authUser,checkAuth,isCheckingAuth} = useAuthStore();
   useEffect(() => {
@@ -22,6 +24,8 @@ return (
     <Route path="/login" element={<LoginPage/>} />
     <Route path="/dashboard" element={<Dashboard/>} />
     <Route path="/createquiz" element={<CreateQuizModal/>} />
+    <Route path="/createquiz/manual" element={<ManualCreatePage/>} />
+    <Route path="/createquiz/ai" element={<AICreatePage/>} />
     </Routes>
   );
 }
