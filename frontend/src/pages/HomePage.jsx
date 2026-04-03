@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDelayedNavigate } from "../hooks/useDelayedNavigate";
 export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
 
@@ -7,7 +8,8 @@ export default function HomePage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
+  const { goTo, loadingPath } = useDelayedNavigate(400);
+  
   return (
     <>
       <style>{`
@@ -140,6 +142,10 @@ export default function HomePage() {
         }
 
         .btn-signin {
+         display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
           background: transparent;
           border: 1.5px solid rgba(255,255,255,0.25);
           color: white;
@@ -155,6 +161,10 @@ export default function HomePage() {
         .btn-signin:hover { border-color: rgba(255,255,255,0.5); }
 
         .btn-register {
+             display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
           background: linear-gradient(135deg, #7c3aed, #a855f7);
           border: none;
           color: white;
@@ -242,6 +252,10 @@ export default function HomePage() {
         }
 
         .btn-get-started {
+                 display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
           background: linear-gradient(135deg, #7c3aed, #a855f7);
           border: none;
           color: white;
@@ -304,6 +318,36 @@ export default function HomePage() {
           color: #a78bfa;
           font-weight: 700;
         }
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top: 2px solid #a855f7;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* inner cutout for ring effect */
+.spinner::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: #0d0d14; /* same as your background */
+  border-radius: 50%;
+}
+.spinner-light {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
       `}</style>
 
       <div className="landing-root">
@@ -321,8 +365,29 @@ export default function HomePage() {
               ))} */}
             </div>
             <div className="nav-buttons">
-              <button className="btn-signin">Sign Up</button>
-              <button className="btn-register">LogIn</button>
+              <button
+                className="btn-signin"
+                onClick={() => goTo("/signup")}
+                disabled={loadingPath === "/signup"}
+              >
+                {loadingPath === "/signup" ? (
+                  <span className="spinner"></span>
+                ) : (
+                  "Sign Up"
+                )}
+              </button>
+
+              <button
+                className="btn-register"
+                onClick={() => goTo("/login")}
+                disabled={loadingPath === "/login"}
+              >
+                {loadingPath === "/login" ? (
+                  <span className="spinner-light"></span>
+                ) : (
+                  "Log In"
+                )}
+              </button>
             </div>
           </div>
         </nav>
@@ -335,18 +400,27 @@ export default function HomePage() {
           </div>
 
           <h1 className="heading">
-            Learn, Quiz,{" "}
-            <span className="heading-accent">Compete</span>
+            Learn, Quiz, <span className="heading-accent">Compete</span>
           </h1>
 
           <p className="subtext">
             Join thousands of students and teachers on the ultimate quiz
-            platform. Test your knowledge, compete with peers, and win
-            exciting rewards.
+            platform. Test your knowledge, compete with peers, and win exciting
+            rewards.
           </p>
 
           <div className="cta-row">
-            <button className="btn-get-started">Get Started</button>
+            <button
+              className="btn-get-started"
+              onClick={() => goTo("/signup")}
+              disabled={loadingPath === "/signup"}
+            >
+              {loadingPath === "/signup" ? (
+                <span className="spinner-light"></span>
+              ) : (
+                "Get Started"
+              )}
+            </button>
           </div>
         </main>
       </div>
