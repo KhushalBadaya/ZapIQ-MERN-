@@ -1,6 +1,19 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+export const checkAuth = async (req, res) => {
+  try {
+    // req.user comes from protectedRoute middleware
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error in checkAuth:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
   try {

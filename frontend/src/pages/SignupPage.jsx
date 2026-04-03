@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore.js";
+<<<<<<< Updated upstream
 import { useNavigate } from "react-router";
+=======
+import { useNavigate } from "react-router-dom";
+
+>>>>>>> Stashed changes
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
