@@ -28,6 +28,11 @@ const resultSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    score:{
+      type:Number,
+      required:true,
+    },
+    isPassed: { type: Boolean, default: false },
     answers: [
       {
         questionId: {

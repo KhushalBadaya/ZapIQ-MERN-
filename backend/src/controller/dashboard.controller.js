@@ -1,7 +1,6 @@
-
 import Quiz from "../models/Quiz.js";
-
-import OpenAI from "openai";
+import { ENV } from "../lib/env.js";
+import Groq from "groq-sdk";
 import Question from "../models/Question.js";
 export const createQuizManul = async (req, res) => {
   try {
@@ -27,20 +26,29 @@ export const createQuizManul = async (req, res) => {
     res.status(201).json({ success: true, data: newQuiz });
   } catch (error) {
     console.log("Error in creating quiz", error);
-    res.stauts(500).json({ message: "Internal sever Error" });
+    res.status(500).json({ message: "Internal sever Error" });
   }
 };
 
 export const createQuizwithAI = async (req, res) => {
   try {
-    const { topic, numberofquestions } = req.body;
+    const {
+      topic,
+      numberOfQuestions,
+      title,
+      description,
+      timeLimit,
+      passingScore,
+      randomizeQuestions,
+      immediateResults,
+    } = req.body;
     if (!topic) return res.status(400).json({ message: "Topic is required" });
-    if (!numberofquestions || numberofquestions < 1 || numberofquestions > 20)
+    if (!numberOfQuestions || numberOfQuestions < 1 || numberOfQuestions > 20)
       return res
         .status(400)
         .json({ message: "Number of questions must be in between 1 and 20" });
     const userId = req.user._id;
-    const prompt = `Generate ${numberofquestions} quiz questions from topic ${topic}  
+    const prompt = `Generate ${numberOfQuestions} quiz questions from topic ${topic}  
         Return ONLY a valid JSON array, no extra text, no markdown, no backticks.
         Each object must follow this exact format:
         [
@@ -53,38 +61,69 @@ export const createQuizwithAI = async (req, res) => {
                 "correctAnswer": "Exact text of the correct option"
             }
         ]`;
-
-    const response = await OpenAI.Chat.Completions.create({
-      model: "gpt-3.5-turbo",
+    const client = new Groq({ apiKey: ENV.GROQ_API_KEY });
+    const response = await client.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
     });
     const rawContent = response.choices[0].message.content;
-    let parsedQuestions;
-    try {
-      parsedQuestions = JSON.parse(rawContent);
-    } catch (parseError) {
-      return res
-        .status(500)
-        .json({ message: "AI returned invalid format, please try again" });
+    if (!rawContent) {
+      console.log("FULL OPENAI RESPONSE:", response);
+      return res.status(500).json({
+        message: "AI did not return content",
+      });
     }
-    const savedQuestions = await Question.insertMany(
-      parsedQuestions.map((q) => ({
-        question: q.question,
-        option1: q.option1,
-        option2: q.option2,
-        option3: q.option3,
-        option4: q.option4,
-        correctAnswer: q.correctAnswer,
+
+    let parsedQuestions;
+
+    try {
+      // Extract ONLY JSON array
+      const start = rawContent.indexOf("[");
+      const end = rawContent.lastIndexOf("]");
+
+      if (start === -1 || end === -1) {
+        throw new Error("No JSON found");
+      }
+
+      const jsonString = rawContent.slice(start, end + 1);
+
+      parsedQuestions = JSON.parse(jsonString);
+    } catch (err) {
+      console.log("RAW AI RESPONSE:", rawContent);
+      return res.status(500).json({
+        message: "AI returned invalid JSON",
+      });
+    }
+    console.log("PARSED:", parsedQuestions);
+    console.log("PARSED:", parsedQuestions);
+
+    const validQuestions = parsedQuestions
+      .map((q) => ({
+        question: q.question || "",
+        answer1: q.option1 || "",
+        answer2: q.option2 || "",
+        answer3: q.option3 || "",
+        answer4: q.option4 || "",
+        correctAnswer:
+          q.correctAnswer ||
+          q.correctanswer ||
+          q.correct_answer ||
+          q.answer ||
+          "",
         createdBy: userId,
-      })),
-    );
+      }))
+      .filter((q) => q.question && q.answer1 && q.answer2 && q.correctAnswer);
+
+    const savedQuestions = await Question.insertMany(validQuestions);
     const newQuiz = await Quiz.create({
-      title: topic,
-      topic: topic,
+      title,
+      description,
+      timeLimit,
+      passingScore,
+      randomizeQuestions,
+      immediateResults,
       questions: savedQuestions.map((q) => q._id),
       createdBy: userId,
-      isAIGenerated: true,
     });
 
     res.status(201).json({ success: true, data: newQuiz });
@@ -108,46 +147,41 @@ export const getRecentQuiz = async (req, res) => {
       .select("title topic isAIGenerated createdAt questions createdBy");
 
     if (recentquiz.length === 0) {
-      return res.status(200).json({ message: "No recent quiz found" });
+      return res.status(200).json({ success: true, data: [] });
     }
-    res
-      .status(200)
-      .json({
-        success: true,
-        count: recentquiz.length,
-        data: recentquiz,
-      });
+    res.status(200).json({
+      success: true,
+      count: recentquiz.length,
+      data: recentquiz,
+    });
   } catch (error) {
     console.log("Error in getting recent quizzes", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-  export const getQuizHistroy = async (req, res) => {
-    try {
-      const userId=req.user._id;
-      const quizhistroy= await Quiz.find({
-        $or:[
-          {createdBy:userId},
-          {participants:userId}
-        ]
-      })
-      .sort({createdAt:-1})
-      .populate("createdBy","name email")
+export const getQuizHistroy = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { limit } = req.query;
+    const quizhistroy = await Quiz.find({
+      $or: [{ createdBy: userId }, { participants: userId }],
+    })
+      .sort({ createdAt: -1 })
+       .limit(limit ? Number(limit) : 0)
+      .populate("createdBy", "name email")
       .populate("questions")
-      .select("title topic isAIGenerated createdAt questions createdBy")
+      .select("title topic isAIGenerated createdAt questions createdBy");
 
-      if(quizhistroy.length===0){
-        return res.status(200).json({ message: "No quiz found" });
-      }
-        res
-        .status(200)
-        .json({
-          success: true,
-          count: quizhistroy.length,
-          data: quizhistroy,
-        });
-    } catch (error) {
-      console.log("Error in getting recent quizzes", error);
-      res.status(500).json({ message: "Internal Server Error" });
+    if (quizhistroy.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
     }
-  };
+    res.status(200).json({
+      success: true,
+      count: quizhistroy.length,
+      data: quizhistroy,
+    });
+  } catch (error) {
+    console.log("Error in getting recent quizzes", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

@@ -43,7 +43,17 @@ export default function ResultPage() {
       </div>
     </div>
   );
-
+if (!result) return (  // ✅ add this
+  <div style={{ minHeight: "100vh", background: "#0f0f13", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontFamily: "Sora, sans-serif" }}>
+    <div style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 16 }}>😕</div>
+      <div>Result not found</div>
+      <button onClick={() => navigate("/dashboard")} style={{ marginTop: 16, padding: "10px 24px", background: "#7c3aed", border: "none", borderRadius: 9, color: "white", cursor: "pointer" }}>
+        Back to Dashboard
+      </button>
+    </div>
+  </div>
+);
   const {
     score, totalQuestions, correctQuestions,
     incorrectQuestions, percentage, isPassed,
