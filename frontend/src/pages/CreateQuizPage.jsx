@@ -455,7 +455,7 @@
                 </div>
               </div>
               <div className="modal-header-right">
-                {step === 1 && <button className="btn-draft">Save Draft</button>}
+
                 <button className="btn-close" onClick={onClose}>✕</button>
               </div>
             </div>

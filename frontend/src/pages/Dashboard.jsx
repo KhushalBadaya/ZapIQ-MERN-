@@ -639,13 +639,14 @@
             </div>
 
             {/* History + Recent Side by Side */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20, alignItems: "start" }}>
 
             {/* History */}
-            <div className="card">
+            <div className="card" style={{ display: "flex", flexDirection: "column" }}>
               <div className="card-title">History</div>
               <div className="card-subtitle">View your past Quiz history here</div>
-                 <button className="btn-view-all" onClick={() => navigate("/history")}>View All →</button>
+              
+              <div style={{ flex: 1 }}>
               {loadingHistory ? (
                 <>
                   <div className="skeleton" />
@@ -674,11 +675,19 @@
                     </div>
                     {q.isLive
                       ? <button className="btn-view-live">View Live</button>
-                      : <button className="btn-manage">Manage</button>
+                      : <button className="btn-manage" onClick={() => navigate(`/quiz/${q._id}`)}>Play Again</button>
                     }
                   </div>
                 ))
               )}
+              </div>
+              <button 
+                className="btn-view-all" 
+                style={{ marginTop: "16px", alignSelf: "center", width: "100%", padding: "10px" }} 
+                onClick={() => navigate("/history")}
+              >
+                View All →
+              </button>
             </div>
 
             {/* Recent Quizzes */}
@@ -713,16 +722,10 @@
                           </div>
                         </div>
                       </div>
-                      <span style={{ fontSize: 12, color: q.isAIGenerated ? "#a78bfa" : "rgba(255,255,255,0.3)", fontWeight: 600 }}>
-                        {q.isAIGenerated ? "🤖 AI" : "✍️ Manual"}
-                      </span>
+
                     </div>
                   ))}
-                  <div className="create-card" onClick={() =>setShowModal(true)}>
-                    <div className="create-plus">+</div>
-                    <div className="create-label">Create New Quiz</div>
-                    <div className="create-desc">Add questions, set time limits and more</div>
-                  </div>
+
                 </div>
               )}
             </div>

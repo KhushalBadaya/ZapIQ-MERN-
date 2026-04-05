@@ -4,29 +4,48 @@ import Groq from "groq-sdk";
 import Question from "../models/Question.js";
 export const createQuizManul = async (req, res) => {
   try {
-    const { question, option1, option2, option3, option4, correctanswer } =
-      req.body;
-    if (!question || !option1 || !option2 || !correctanswer)
-      return res.status(400).json({ message: "Invaild input" });
+    const { questions, title, description, timeLimit, passingScore, randomizeQuestions, immediateResults, topic } = req.body;
+    
+    if (!questions || !Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ message: "Invalid input: Please provide questions" });
+    }
+
     const userId = req.user._id;
-    const newQuestion = await Question.create({
-      question,
-      option1,
-      option2,
-      option3,
-      option4,
-      correctanswer,
+
+    // Map questions to match the Question schema
+    const validQuestions = questions.map(q => ({
+      question: q.question,
+      answer1: q.option1,
+      answer2: q.option2,
+      answer3: q.option3,
+      answer4: q.option4,
+      correctAnswer: q.correctAnswer,
       createdBy: userId,
-    });
+    })).filter(q => q.question && q.answer1 && q.answer2 && q.correctAnswer);
+
+    if (validQuestions.length === 0) {
+      return res.status(400).json({ message: "Invalid input: No valid questions provided" });
+    }
+
+    const savedQuestions = await Question.insertMany(validQuestions);
 
     const newQuiz = await Quiz.create({
-      questions: [newQuestion._id],
+      title: title || "Untitled Quiz",
+      description,
+      timeLimit,
+      passingScore,
+      randomizeQuestions,
+      immediateResults,
+      topic,
+      questions: savedQuestions.map((q) => q._id),
       createdBy: userId,
+      isAIgenerated: false,
     });
+
     res.status(201).json({ success: true, data: newQuiz });
   } catch (error) {
     console.log("Error in creating quiz", error);
-    res.status(500).json({ message: "Internal sever Error" });
+    res.status(500).json({ message: "Internal server Error" });
   }
 };
 
@@ -124,6 +143,7 @@ export const createQuizwithAI = async (req, res) => {
       immediateResults,
       questions: savedQuestions.map((q) => q._id),
       createdBy: userId,
+      isAIgenerated: true,
     });
 
     res.status(201).json({ success: true, data: newQuiz });
@@ -144,7 +164,7 @@ export const getRecentQuiz = async (req, res) => {
       .limit(Number(limit))
       .populate("createdBy", "name email")
       .populate("questions")
-      .select("title topic isAIGenerated createdAt questions createdBy");
+      .select("title topic isAIgenerated createdAt questions createdBy");
 
     if (recentquiz.length === 0) {
       return res.status(200).json({ success: true, data: [] });
@@ -170,7 +190,7 @@ export const getQuizHistroy = async (req, res) => {
        .limit(limit ? Number(limit) : 0)
       .populate("createdBy", "name email")
       .populate("questions")
-      .select("title topic isAIGenerated createdAt questions createdBy");
+      .select("title topic isAIgenerated createdAt questions createdBy");
 
     if (quizhistroy.length === 0) {
       return res.status(200).json({ success: true, data: [] });

@@ -12,6 +12,7 @@ import AICreatePage from "./pages/AIQuizPage.jsx";
 import QuizPage from "./pages/QuizPage.jsx";
 import ResultPage from "./pages/ResultPage.jsx";
 import HistoryPage from "./pages/HistroyPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
 function App() {
   const {authUser,checkAuth,isCheckingAuth} = useAuthStore();
   useEffect(() => {
@@ -32,6 +33,7 @@ return (
     <Route path="/quiz/:id" element={<QuizPage/>} />
     <Route path="/quiz/:id/result" element={<ResultPage/>} />
     <Route path="/history" element={authUser ? <HistoryPage /> : <Navigate to="/" />} />
+    <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/" />} />
     </Routes>
   );
 }
